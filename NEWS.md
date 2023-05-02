@@ -1,4 +1,4 @@
-# esqlabsR (development version)
+# esqlabsR 5.0.2
 
 Improve install package
 
