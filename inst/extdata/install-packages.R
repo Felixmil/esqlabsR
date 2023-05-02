@@ -1,7 +1,7 @@
 # install dependencies
 installationDeps <- function(installOption) {
   cat("Installing installation dependencies.\n")
-  
+
   # if user chose local installation, install renv and initialize it
   if (installOption == 1) {
     install.packages("renv")
@@ -60,7 +60,7 @@ runTestSimulation <- function() {
 }
 
 # Main installation script
-installEsqLabsR <- function() {
+installEsqLabsR <- function(version = "release") {
   # Display a menu asking if user wants to install packages in local env or  globally
   installOption <- utils::menu(c("In local environment (available for one project)", "In Glocal environment (available for all projects)"),
                                title = "Where do you want to install {esqlabsR} and other packages?"
@@ -77,7 +77,16 @@ installEsqLabsR <- function() {
                    type = "binary",
                    quiet = TRUE
   )
-  remotes::install_github("esqLABS/esqlabsR",
+
+  match.arg(version, c("release","dev"))
+
+  url <-
+    switch (version,
+    "release" = "esqLABS/esqlabsR@*latest",
+    "dev" = "esqLABS/esqlabsR",
+  )
+
+  remotes::install_github(url,
                           quiet = TRUE,
                           build = TRUE
   )
@@ -122,4 +131,4 @@ installEsqLabsR <- function() {
 }
 
 # run installation function
-installEsqLabsR()
+installEsqLabsR(version = "release")
