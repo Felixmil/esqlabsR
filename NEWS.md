@@ -1,4 +1,6 @@
-# esqlabsR (development version)
+# esqlabsR 5.1.0
+
+# esqlabsR 5.0.3
 
 # esqlabsR 5.0.2
 
