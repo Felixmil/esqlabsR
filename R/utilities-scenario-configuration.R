@@ -36,36 +36,30 @@ readScenarioConfigurationFromExcel <- function(scenarioNames = NULL, projectConf
   # Define the casting functions to cast columns to specific type
   colTypes <- c(
     "text", "text", "text", "logical", "text",
-    "text", "numeric", "text", "logical",
+    "text", "text", "text", "logical",
     "numeric", "text", "text", "text"
   )
 
   # Read only the header of the excel file to check structure
   header <- readExcel(
-    path = file.path(
-      projectConfiguration$paramsFolder,
-      projectConfiguration$scenarioDefinitionFile
-    ),
+    path = projectConfiguration$scenarioDefinitionFile,
     sheet = "Scenarios",
     n_max = 0
   )
 
   # Check if the structure is correct
   if (!identical(names(header), expectedColumns)) {
-    stop(messages$errorWrongXLSStructure(filePath = file.path(
-      projectConfiguration$paramsFolder,
-      projectConfiguration$scenarioDefinitionFile
-    ), expectedColNames = expectedColumns))
+    stop(messages$errorWrongXLSStructure(
+      filePath = projectConfiguration$scenarioDefinitionFile,
+      expectedColNames = expectedColumns
+    ))
   }
 
   # If no errors were raised before, structure is correct. Whole excel file is
   # read with column types.
 
   wholeData <- readExcel(
-    path = file.path(
-      projectConfiguration$paramsFolder,
-      projectConfiguration$scenarioDefinitionFile
-    ),
+    path = projectConfiguration$scenarioDefinitionFile,
     sheet = "Scenarios",
     col_types = colTypes
   )
@@ -74,10 +68,7 @@ readScenarioConfigurationFromExcel <- function(scenarioNames = NULL, projectConf
   wholeData <- dplyr::filter(wholeData, !dplyr::if_all(dplyr::everything(), is.na))
 
   outputPathsDf <- readExcel(
-    path = file.path(
-      projectConfiguration$paramsFolder,
-      projectConfiguration$scenarioDefinitionFile
-    ),
+    path = projectConfiguration$scenarioDefinitionFile,
     sheet = "OutputPaths"
   )
 
@@ -112,12 +103,11 @@ readScenarioConfigurationFromExcel <- function(scenarioNames = NULL, projectConf
     }
 
     # Simulation time
-    simTime <- data$SimulationTime
-    simTimeUnit <- data$SimulationTimeUnit
     # Set the time only if new value is defined
-    if (!is.na(simTime)) {
-      scenarioConfiguration$simulationTime <-
-        ospsuite::toBaseUnit(ospDimensions$Time, values = simTime, unit = simTimeUnit)
+    if (!is.na(data$SimulationTime)) {
+      scenarioConfiguration$simulationTime <- data$SimulationTime
+
+      scenarioConfiguration$simulationTimeUnit <- data$SimulationTimeUnit
     }
 
     # Individual id
@@ -190,13 +180,13 @@ readScenarioConfigurationFromExcel <- function(scenarioNames = NULL, projectConf
 #' @param scenarioConfiguration A `ScenarioConfiguration` object holding the
 #' name of the application protocol.
 #'
+#' This function is deprecated. Use `setParametersFromXLS` instead.
+#'
 #' @export
 setApplications <- function(simulation, scenarioConfiguration) {
+  .Deprecated("setApplications", "setParametersFromXLS")
   # Set from excel
-  excelFilePath <- file.path(
-    scenarioConfiguration$projectConfiguration$paramsFolder,
-    scenarioConfiguration$projectConfiguration$scenarioApplicationsFile
-  )
+  excelFilePath <- scenarioConfiguration$projectConfiguration$scenarioApplicationsFile
   # Only try to apply parameters if the sheet exists
   if (any(readxl::excel_sheets(excelFilePath) == scenarioConfiguration$applicationProtocol)) {
     params <- readParametersFromXLS(excelFilePath, scenarioConfiguration$applicationProtocol)
@@ -220,4 +210,39 @@ setApplications <- function(simulation, scenarioConfiguration) {
       stop(messages$noPopulationIdForPopulationScenario(scenarioConfiguration$scenarioName))
     }
   }
+}
+
+# Parse simulation time intervals
+.parseSimulationTimeIntervals <- function(simulationTimeIntervalsString) {
+  # Check if the simulation time intervals are defined
+  if (is.null(simulationTimeIntervalsString)) {
+    return(NULL)
+  }
+
+  # Split the string by ';'
+  simulationTimeIntervals <- strsplit(x = simulationTimeIntervalsString, split = ";", fixed = TRUE)[[1]]
+  # Split each interval by ','
+  simulationTimeIntervals <- strsplit(x = simulationTimeIntervals, split = ",", fixed = TRUE)
+  # Convert to numeric
+  simulationTimeIntervals <- lapply(simulationTimeIntervals, as.numeric)
+  # Validate that all are numeric
+  validateIsNumeric(simulationTimeIntervals)
+  # Validate that all are positive
+  if (any(unlist(simulationTimeIntervals) < 0)) {
+    stop(messages$stopWrongTimeIntervalString(simulationTimeIntervalsString))
+  }
+  # Validate all intervals are of length 3
+  if (any(sapply(simulationTimeIntervals, length) != 3)) {
+    stop(messages$stopWrongTimeIntervalString(simulationTimeIntervalsString))
+  }
+  # Validate all resolution entries are greater than 0
+  if (any(sapply(simulationTimeIntervals, function(x) x[3] <= 0))) {
+    stop(messages$stopWrongTimeIntervalString(simulationTimeIntervalsString))
+  }
+  # Validate all start values are smaller than end values
+  if (any(sapply(simulationTimeIntervals, function(x) x[1] >= x[2]))) {
+    stop(messages$stopWrongTimeIntervalString(simulationTimeIntervalsString))
+  }
+
+  return(simulationTimeIntervals)
 }

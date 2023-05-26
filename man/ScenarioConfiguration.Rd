@@ -7,19 +7,6 @@
 \description{
 An object storing configuration of a specific scenario
 }
-\examples{
-
-## ------------------------------------------------
-## Method `ScenarioConfiguration$new`
-## ------------------------------------------------
-
-\dontrun{
-#This example gets the current value of the "Age" parameter and multiplies
-#it by a factor coming from argument.
-#Assume that scenarioConfiguration has been created from excel.
-scenarioConfiguration$customFunction <- function(
-}
-}
 \section{Super class}{
 \code{\link[ospsuite.utils:Printable]{ospsuite.utils::Printable}} -> \code{ScenarioConfiguration}
 }
@@ -51,9 +38,6 @@ are used.}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{setTestParameters}}{Boolean representing whether parameters defined
-in \code{TestParameters} are to be applied to the simulation}
-
 \item{\code{simulateSteadyState}}{Boolean representing whether the simulation
 will be brought to a steady-state first}
 
@@ -61,10 +45,13 @@ will be brought to a steady-state first}
 will be created (value is \code{FALSE}) or an existing population will be imported
 from a csv.}
 
-\item{\code{simulationTime}}{Simulation time in minutes. If \code{NULL} (default),
-simulation time as defined in the \code{Simulation} object will be used.}
+\item{\code{simulationTime}}{Specified simulation time intervals. If \code{NULL} (default),
+simulation time as defined in the \code{Simulation} object will be used.
+Accepted are multiple time intervals separated by a ';'. Each time interval
+is a triplet of values <StartTime, EndTime, Resolution>, where \code{Resolution} is the number of
+simulated points per time unit defined in the column \code{TimeUnit}.}
 
-\item{\code{pointsPerMinute}}{Resolution of the outputs in points per minute}
+\item{\code{simulationTimeUnit}}{Unit of the simulation time intervals.}
 
 \item{\code{steadyStateTime}}{Time in minutes to simulate if simulating steady-state. May be \code{NULL}.}
 
@@ -76,20 +63,8 @@ that will be applied to the simulation}
 based on information stored in \code{populationParamsFile}. Default is
 "Individual"}
 
-\item{\code{simulationRunOptions}}{Object of type \code{SimulationRunOptions} that will be passed
-to simulation runs. If \code{NULL}, default options are used}
-
 \item{\code{projectConfiguration}}{\code{ProjectConfiguration} that will be used in scenarios.
 Read-only}
-
-\item{\code{customFunction}}{A function that will be applied at the very last
-step of simulation initialization. Can be applied for advanced scenario
-configuration. If the function requires additional arguments, they must be
-defined in \code{customFunctionArgs} as a list. The object \code{simulation} can always
-be accessed.}
-
-\item{\code{customFunctionArgs}}{Arguments for the\code{customFunction()}
-Named list of type \code{list(argumentName = value)}}
 }
 \if{html}{\out{</div>}}
 }
@@ -122,19 +97,6 @@ Initialize a new instance of the class
 \subsection{Returns}{
 A new \code{ScenarioConfiguration} object.
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\dontrun{
-#This example gets the current value of the "Age" parameter and multiplies
-#it by a factor coming from argument.
-#Assume that scenarioConfiguration has been created from excel.
-scenarioConfiguration$customFunction <- function(
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ScenarioConfiguration-addParamSheets"></a>}}
@@ -179,13 +141,13 @@ If \code{NULL} (default), all sheets are removed}
 \subsection{Method \code{print()}}{
 Print the object to the console
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ScenarioConfiguration$print(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ScenarioConfiguration$print(projectConfiguration = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{Rest arguments.}
+\item{\code{projectConfiguration}}{Whether to also print project configuration. default to TRUE.}
 }
 \if{html}{\out{</div>}}
 }
