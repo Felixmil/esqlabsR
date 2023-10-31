@@ -61,7 +61,7 @@ Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Remotes:
-    ospsuite.utils=github::Open-Systems-Pharmacology/OSPSuite.RUtils,
-    tlf=github::Open-Systems-Pharmacology/TLF-Library,
-    ospsuite=github::Open-Systems-Pharmacology/OSPSuite-R,
-    ospsuite.parameteridentification=github::Open-Systems-Pharmacology/OSPSuite.ParameterIdentification
+    github::Open-Systems-Pharmacology/OSPSuite.RUtils,
+    github::Open-Systems-Pharmacology/TLF-Library,
+    github::Open-Systems-Pharmacology/OSPSuite-R,
+    github::Open-Systems-Pharmacology/OSPSuite.ParameterIdentification
