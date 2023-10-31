@@ -22,54 +22,54 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - name: Download Zip File
+    - name: Download Zip File
+    run: |
+      # Define the URL of the zip file you want to download
+      $url = "https://ci.appveyor.com/api/projects/open-systems-pharmacology-ci/pk-sim/artifacts/setup.zip?branch=develop"
+      # Define the location where you want to save the zip file
+      $outputPath = "${{ runner.workspace }}/setup.zip"
+      Invoke-WebRequest -Uri $url -OutFile $outputPath
+    shell: powershell
+
+    - name: Unzip Zip File
       run: |
-        # Define the URL of the zip file you want to download
-        $url = "https://ci.appveyor.com/api/projects/open-systems-pharmacology-ci/pk-sim/artifacts/setup.zip?branch=develop"
-        # Define the location where you want to save the zip file
-        $outputPath = "${{ runner.workspace }}/setup.zip"
-        Invoke-WebRequest -Uri $url -OutFile $outputPath
+        $zipPath = "${{ runner.workspace }}/setup.zip"
+        $unzipPath = "${{ runner.workspace }}/unzipped"
+        Expand-Archive -Path $zipPath -DestinationPath $unzipPath
       shell: powershell
 
-      - name: Unzip Zip File
-        run: |
-          $zipPath = "${{ runner.workspace }}/setup.zip"
-          $unzipPath = "${{ runner.workspace }}/unzipped"
-          Expand-Archive -Path $zipPath -DestinationPath $unzipPath
-        shell: powershell
+    - name: Install MSI
+      run: |
+        $msiPath = Get-ChildItem -Path "${{ runner.workspace }}/unzipped" -Filter "*.msi" | Select-Object -First 1
+        if ($msiPath) {
+          Start-Process msiexec -ArgumentList "/i", $msiPath.FullName, "/quiet", "/qn", "/norestart" -Wait
+        } else {
+          Write-Output "No MSI file found in the unzipped directory."
+          exit 1
+        }
+      shell: powershell
 
-      - name: Install MSI
-        run: |
-          $msiPath = Get-ChildItem -Path "${{ runner.workspace }}/unzipped" -Filter "*.msi" | Select-Object -First 1
-          if ($msiPath) {
-            Start-Process msiexec -ArgumentList "/i", $msiPath.FullName, "/quiet", "/qn", "/norestart" -Wait
-          } else {
-            Write-Output "No MSI file found in the unzipped directory."
-            exit 1
-          }
-        shell: powershell
+    - uses: r-lib/actions/setup-pandoc@v2
 
-      - uses: r-lib/actions/setup-pandoc@v2
+    - uses: r-lib/actions/setup-r@v2
+      with:
+        use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          use-public-rspm: true
+    - uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        extra-packages: any::pkgdown, local::.
+        needs: website
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::pkgdown, local::.
-          needs: website
+    - name: Build site
+      run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+      shell: Rscript {0}
 
-      - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
-        shell: Rscript {0}
-
-      - name: Deploy to GitHub pages 🚀
-        if: github.event_name != 'pull_request'
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
-        with:
-          clean: false
-          branch: gh-pages
-          folder: docs
+    - name: Deploy to GitHub pages 🚀
+      if: github.event_name != 'pull_request'
+      uses: JamesIves/github-pages-deploy-action@v4.4.1
+      with:
+        clean: false
+        branch: gh-pages
+        folder: docs
