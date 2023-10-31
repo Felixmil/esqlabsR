@@ -16,7 +16,7 @@ Maintainer: Pavel Balazki <pavel.balazki@esqlabs.com>
 Description: Utilities functions for modeling and simulation projects
     within 'esqLABS' organization.
 License: GPL-2
-URL: https://github.com/esqLABS/esqlabsR
+URL: https://github.com/esqLABS/esqlabsR, https://felixmil.github.io/esqlabsR/
 BugReports: https://github.com/esqLABS/esqlabsR/issues
 Depends:
     ospsuite (>= 11.2.0),
