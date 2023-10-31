@@ -90,24 +90,24 @@ jobs:
           path: docs
 
 
-   deploy:
-      concurrency:
-        group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
-      needs: [pkgdown] # The second job must depend on the first one to complete before running and uses ubuntu-latest instead of windows.
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout 🛎️
-          uses: actions/checkout@v3
+ deploy:
+    concurrency:
+      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
+    needs: [pkgdown] # The second job must depend on the first one to complete before running and uses ubuntu-latest instead of windows.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
 
-        - name: Download Artifacts 🔻 # The built project is downloaded into the 'site' folder.
-          uses: actions/download-artifact@v1
-          with:
-            name: pkgdown
+      - name: Download Artifacts 🔻 # The built project is downloaded into the 'site' folder.
+        uses: actions/download-artifact@v1
+        with:
+          name: pkgdown
 
-        - name: Deploy to GitHub pages 🚀
-          if: github.event_name != 'pull_request'
-          uses: JamesIves/github-pages-deploy-action@v4.4.1
-          with:
-            clean: false
-            branch: gh-pages
-            folder: docs
+      - name: Deploy to GitHub pages 🚀
+        if: github.event_name != 'pull_request'
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        with:
+          clean: false
+          branch: gh-pages
+          folder: docs
